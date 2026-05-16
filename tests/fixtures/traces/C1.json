@@ -1,0 +1,15 @@
+{
+  "id": "C1",
+  "description": "Senior leadership CXO selection with OPQ",
+  "turns": [
+    {"user": "We need a solution for senior leadership."},
+    {"user": "The pool consists of CXOs, director-level positions; people with more than 15 years of experience."},
+    {"user": "Selection — comparing candidates against a leadership benchmark."},
+    {"user": "Perfect, that's what we need."}
+  ],
+  "expected_assessments": [
+    "Occupational Personality Questionnaire OPQ32r",
+    "OPQ Universal Competency Report 2.0",
+    "OPQ Leadership Report"
+  ]
+}

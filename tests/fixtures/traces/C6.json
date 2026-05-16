@@ -1,0 +1,13 @@
+{
+  "id": "C6",
+  "description": "Chemical plant operators, safety-critical, industrial",
+  "turns": [
+    {"user": "We're hiring plant operators for a chemical facility. Safety is absolute top priority — reliability, procedure compliance, never cutting corners. What do you recommend?"},
+    {"user": "What's the difference between the DSI and the Safety & Dependability 8.0?"},
+    {"user": "We're industrial. The 8.0 bundle is the right fit. Confirmed."}
+  ],
+  "expected_assessments": [
+    "Manufac. & Indust. - Safety & Dependability 8.0",
+    "Workplace Health and Safety (New)"
+  ]
+}

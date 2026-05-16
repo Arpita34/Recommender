@@ -1,0 +1,9 @@
+httpx
+beautifulsoup4
+sentence-transformers
+faiss-cpu
+fastapi
+uvicorn
+pydantic
+google-generativeai
+requests

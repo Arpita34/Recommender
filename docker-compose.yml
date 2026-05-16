@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL}
+      - MAX_RETRIEVAL_K=${MAX_RETRIEVAL_K}
+      - LOG_LEVEL=${LOG_LEVEL}
+    env_file:
+      - .env
+    restart: unless-stopped

@@ -1,0 +1,16 @@
+{
+  "id": "C2",
+  "description": "Senior Rust engineer for high-performance networking",
+  "turns": [
+    {"user": "I'm hiring a senior Rust engineer for high-performance networking infrastructure. What assessments should I use?"},
+    {"user": "Yes, go ahead. Should I also add a cognitive test for this level?"},
+    {"user": "That works. Thanks."}
+  ],
+  "expected_assessments": [
+    "Smart Interview Live Coding",
+    "Linux Programming (General)",
+    "Networking and Implementation (New)",
+    "SHL Verify Interactive G+",
+    "Occupational Personality Questionnaire OPQ32r"
+  ]
+}

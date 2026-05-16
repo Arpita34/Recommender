@@ -1,0 +1,16 @@
+{
+  "id": "C4",
+  "description": "Graduate financial analysts, numerical + SJT",
+  "turns": [
+    {"user": "Hiring graduate financial analysts — final-year students, no work experience. We need numerical reasoning and a finance knowledge test."},
+    {"user": "Good. Can you also add a situational judgement element — work-context decision making for graduates?"},
+    {"user": "That covers it. Numerical + Graduate Scenarios as first filter, domain tests for shortlisted candidates."}
+  ],
+  "expected_assessments": [
+    "SHL Verify Interactive – Numerical Reasoning",
+    "Financial Accounting (New)",
+    "Basic Statistics (New)",
+    "Graduate Scenarios",
+    "Occupational Personality Questionnaire OPQ32r"
+  ]
+}
