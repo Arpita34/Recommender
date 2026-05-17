@@ -47,6 +47,8 @@ def build_index():
     faiss.write_index(index, 'data/faiss_index/index.faiss')
     with open('data/faiss_index/index_meta.json', 'w', encoding='utf-8') as f:
         json.dump(names, f)
+    with open('data/faiss_index/corpus.json', 'w', encoding='utf-8') as f:
+        json.dump(texts, f)
         
     print('Index built successfully and saved to data/faiss_index/.')
 

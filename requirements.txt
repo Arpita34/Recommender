@@ -7,3 +7,6 @@ uvicorn
 pydantic
 google-generativeai
 requests
+rank-bm25
+groq
+python-dotenv

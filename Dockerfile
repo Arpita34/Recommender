@@ -6,10 +6,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# CRITICAL: Bake in pre-built data — do NOT build at runtime
-# This ensures the container starts in under 2 minutes
+# Copy source code and pre-built data (FAISS index + catalog)
 COPY data/ ./data/
 COPY app/ ./app/
+
+# Copy HTML pages served at / and /app
+COPY landing.html ./landing.html
+COPY chat_test.html ./chat_test.html
 
 # Expose FastAPI port
 EXPOSE 8000
