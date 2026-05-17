@@ -1,123 +1,53 @@
 # SHL Assessment Recommender — Approach Document
 
-## 1. Problem & Solution Overview
+## 1. Design Choices
 
-Hiring managers often don't know the vocabulary of psychometric assessment catalogs.
-This project builds a **conversational AI agent** that lets recruiters describe their
-hiring need in plain English and returns a grounded shortlist of SHL Individual Test
-Solutions — with verified names and real URLs — from SHL's live product catalog.
+**Stack:** FastAPI (stateless REST), FAISS (local vector search), Groq Llama 3.3-70b-versatile (LLM inference), sentence-transformers all-MiniLM-L6-v2 (embeddings), Python 3.8.
 
----
+**Why Groq over Gemini/GPT-4:** Groq delivers ~200 tok/s inference — roughly 5–10× faster than hosted alternatives. Given the 30-second timeout per call, speed was the primary selection criterion. The free tier handles evaluation traffic without rate limiting.
 
-## 2. System Architecture
+**Why FAISS over ChromaDB:** FAISS loads from a binary file in under a second, with zero network dependencies. ChromaDB requires a running server process, adding deployment complexity inside a Docker container.
 
-The system is a **stateless REST API** built with FastAPI, following a
-Retrieval-Augmented Generation (RAG) pattern.
+**Why a single LLM call:** Sequential LLM calls cost 2–5 seconds each. Combining intent classification, context extraction, and response generation into one call keeps latency comfortably within the 30-second budget.
 
-```
-POST /chat (messages[])
-  → AgentOrchestrator
-      → Prompt Injection Guard (pre-filter)
-      → RAGRetriever (FAISS semantic search over catalog)
-      → LLM (Groq Llama 3.3-70b) with System Prompt + Catalog Context
-      → Hallucination Guard (resolve names against catalog.json)
-  → ChatResponse (reply, recommendations[], end_of_conversation)
-```
+**Catalog source:** Initially scraped SHL's product catalog using httpx + BeautifulSoup with paginated requests. The scraper only returned ~24 assessments from the static HTML. Switched to directly downloading the official JSON catalog from SHL's internal API endpoint, which yielded 400+ assessments with accurate metadata (duration, job levels, languages, test type keys). All URLs were patched from `/products/` to `/solutions/products/` to match the live site.
 
-**Key components:**
+## 2. Retrieval Setup
 
-| Component | Technology | Reason |
-|---|---|---|
-| Web Framework | FastAPI | Async, Pydantic-native, fast cold starts |
-| LLM | Groq Llama 3.3-70b-versatile | Fastest inference (~200 tok/s), free tier |
-| Embeddings | all-MiniLM-L6-v2 | Runs locally, zero cost, good quality |
-| Vector Store | FAISS IndexFlatIP | Zero infrastructure, baked into Docker image |
-| Catalog Store | JSON file | Zero infrastructure, version-controllable |
-| Scraping | httpx + BeautifulSoup4 | Lightweight, paginated SHL catalog coverage |
+Each catalog entry is embedded by concatenating its name, description, keys (test types), and job levels into a single string. Vectors are stored in a `faiss.IndexFlatIP` index (inner product ≈ cosine similarity on normalized vectors). At query time, all user messages in the conversation are concatenated and used as the retrieval query, returning top-10 candidates.
 
----
+The retrieved names are injected into the system prompt as a JSON catalog context. After the LLM responds, a **hallucination guard** resolves every name in `recommended_names` against the in-memory catalog — any name not present is silently dropped. This means the agent can never return a URL it invented.
 
-## 3. Data Pipeline
+## 3. Prompt Design
 
-### 3.1 Catalog Scraping (Offline)
-A custom scraper (`scripts/scrape_catalog.py`) paginates through SHL's product
-catalog using `?start=0&type=1` query parameters (12 items per page). For each
-product URL, it extracts the name, description, test_type, job_levels, and
-competencies. The result is saved as `data/catalog.json` — the single source of
-truth for the entire system.
+The system prompt enforces ten explicit rules covering:
+- Catalog-grounding (only names from the injected context)
+- JD extraction behavior (extract role/seniority/competencies silently, recommend in the same reply)
+- Turn budget awareness (8 total messages; recommend by turn 6 at the latest)
+- Experience-to-seniority mapping (0–2 yrs → Entry, 3–5 → Mid, 6+ → Senior)
+- Refusal policy (off-topic, legal questions, prompt injection attempts)
+- Comparison behavior (use catalog data only, not model priors)
 
-### 3.2 FAISS Index (Offline)
-Each assessment is embedded into a dense vector by concatenating its name,
-description, test_type, competencies, and job levels into a single string.
-Vectors are stored in a `faiss.IndexFlatIP` (inner product = cosine similarity
-when normalized). The index is **pre-built** and baked into the Docker image —
-it is never built at container startup.
+The output schema is enforced via Groq's `response_format={"type": "json_object"}` parameter, guaranteeing parseable JSON on every call.
 
----
+**What didn't work:**
+- Early versions asked for seniority even when years of experience were already mentioned. Fixed by adding an explicit experience-to-seniority mapping with a rule to never re-ask.
+- When a JD was pasted, the agent would summarise what it extracted as a separate message without recommendations, wasting a turn. Fixed by adding a mandatory JD response structure rule: extract silently, recommend immediately in the same reply.
+- `llama3-70b-8192` was decommissioned by Groq mid-build. Switched to `llama-3.3-70b-versatile`.
 
-## 4. Agent Behavior
+## 4. Evaluation Approach
 
-### Turn-by-Turn Logic
-1. **Injection Check**: Every incoming message is pre-filtered against a list of
-   known jailbreak patterns before reaching the LLM.
-2. **RAG Retrieval**: All user messages are concatenated into a single query and
-   used to retrieve the top-10 most semantically similar assessments from FAISS.
-3. **Single LLM Call**: Intent classification and response generation are combined
-   into one Groq API call using a strict system prompt that mandates JSON-only output.
-4. **Hallucination Guard**: The LLM output's `recommended_names` array is resolved
-   against `catalog.json`. Any name not in the catalog is silently dropped — LLM-
-   generated URLs are never used.
+**Local evaluation:** A `scripts/evaluate.py` replay harness reads the 10 public conversation traces (C1–C10), simulates multi-turn conversations against the live `/chat` endpoint, and computes Recall@10 per trace. Mean Recall@10 on the public traces reached **1.000** after switching to the official API catalog.
 
-### Conversation Rules (enforced via System Prompt)
-- Turn 1 with a vague query → ask ONE clarifying question, return `recommendations: []`
-- Sufficient context → return 1–10 recommendations with name, URL, test_type
-- Off-topic / non-SHL request → politely refuse
-- 8-turn cap → set `end_of_conversation: true`
+**Behavioral probes tested manually:**
+- Vague query on turn 1 → `recommendations: []` with clarifying question ✅
+- Prompt injection attempt → polite refusal, `recommendations: []` ✅
+- Off-topic question (legal advice) → in-scope refusal ✅
+- JD pasted → immediate recommendations without asking for confirmation ✅
+- Mid-conversation refinement → shortlist updates without restarting ✅
 
----
+**What was measured:** After each prompt change, the public traces were re-evaluated to confirm Recall@10 did not drop. Behavioral probes were re-tested manually via a local chat UI (`chat_test.html`) built to avoid manual JSON construction in Swagger.
 
-## 5. Key Design Decisions & Tradeoffs
+## 5. AI Tools Used
 
-### Why Groq over Gemini / GPT-4?
-Groq provides ~200 tokens/second inference — roughly 5-10x faster than hosted
-GPT-4. For a 30-second latency budget, every second matters. The free tier is
-also sufficient for evaluation traffic.
-
-### Why FAISS over ChromaDB?
-FAISS loads from a single binary file with zero network calls. ChromaDB requires
-a running server process. For a containerized deployment with a 2-minute cold-
-start budget, FAISS is the only viable choice.
-
-### Why JSON file over SQLite for the catalog?
-The catalog is read-only after scraping and loaded once at startup into memory.
-A JSON file is simpler to version-control, debug, and embed in the Docker image.
-SQLite would add complexity with no benefit at this scale.
-
-### Why a single LLM call?
-The blueprint warns that each sequential LLM call costs 2-5 seconds. Combining
-intent classification + response generation into one call saves 3-5 seconds per
-request, keeping us safely within the 30-second budget.
-
-### Why RAG over full catalog in prompt?
-Injecting all 150+ assessments into every prompt would consume ~15,000 tokens,
-increasing latency and cost. RAG retrieves only the top-10 most relevant items,
-keeping context under 2,000 tokens while maintaining high Recall@10.
-
----
-
-## 6. Evaluation Results
-
-| Metric | Score |
-|---|---|
-| Recall@10 (local eval, 1 trace) | **1.000** |
-| Schema compliance | **100%** |
-| Prompt injection defense | **Pass** |
-| Cold start (Render.com) | **< 90s** |
-
----
-
-## 7. What I Would Do With More Time
-- Add BM25 keyword search as a hybrid retrieval layer alongside FAISS
-- Add more evaluation traces covering personality, ability, and SJT assessments
-- Fine-tune the test_type extraction heuristics in the scraper
-- Add structured logging with request IDs for production debugging
+**Antigravity (agentic coding assistant)** was used for: scaffolding FastAPI boilerplate, writing the FAISS index builder, drafting the initial system prompt, converting 10 markdown conversation traces to JSON evaluation fixtures, and iterating on prompt rules based on observed failure modes. All design decisions, stack choices, and debugging were directed and validated by me.
