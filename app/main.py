@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from app.models import ChatRequest, ChatResponse
 from app.agent.orchestrator import AgentOrchestrator
+import os
 
 # The brain of our application
 orchestrator = None
@@ -28,6 +30,16 @@ app.add_middleware(
 @app.get('/health')
 def health():
     return {'status': 'ok'}
+
+@app.get('/', response_class=FileResponse)
+def root():
+    """Landing page."""
+    return FileResponse(os.path.join(os.path.dirname(__file__), '..', 'landing.html'))
+
+@app.get('/app', response_class=FileResponse)
+def chat_ui():
+    """Serve the chat advisor UI."""
+    return FileResponse(os.path.join(os.path.dirname(__file__), '..', 'chat_test.html'))
 
 @app.post('/chat', response_model=ChatResponse)
 async def chat(request: ChatRequest):

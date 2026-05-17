@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHL Assessment Advisor</title>
+  <meta name="description" content="AI-powered assessment recommender built on SHL's catalog of 400+ individual test solutions."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:   #0e0e0e;
+      --paper: #f5f2ed;
+      --warm:  #c9a84c;
+      --muted: #9a9690;
+      --line:  #e2ddd6;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    /* ── Layout ───────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* ── Top bar ──────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 60px;
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-brand {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 17px;
+      color: var(--ink);
+      letter-spacing: 0.01em;
+    }
+    .nav-brand em { font-style: italic; color: var(--warm); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-link {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-link:hover { color: var(--ink); }
+    .nav-cta {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: transparent;
+      border: 1.5px solid var(--ink);
+      padding: 8px 20px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-cta:hover { background: var(--ink); color: var(--paper); }
+
+    /* ── Hero ─────────────────────────────────── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 60px;
+      align-items: center;
+      padding: 80px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hero-left {}
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 20px;
+    }
+
+    .hero-heading {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(38px, 4.5vw, 56px);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+    .hero-heading em { font-style: italic; color: var(--warm); }
+
+    .hero-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: #6b6760;
+      max-width: 460px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .btn-primary {
+      font-family: 'DM Sans', inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--paper);
+      background: var(--ink);
+      border: none;
+      padding: 14px 28px;
+      border-radius: 2px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary:hover { background: #2a2a2a; }
+
+    .btn-secondary {
+      font-size: 13.5px;
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-secondary:hover { color: var(--ink); border-color: var(--ink); }
+
+    /* ── Chat preview card ──────────────────── */
+    .hero-right {}
+
+    .preview-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .preview-header {
+      background: var(--ink);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-dots {
+      display: flex; gap: 6px;
+    }
+    .preview-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+    }
+    .preview-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      margin-left: 4px;
+    }
+
+    .preview-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .preview-msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .preview-msg.user { flex-direction: row-reverse; }
+
+    .preview-av {
+      width: 26px; height: 26px;
+      border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .preview-msg.assistant .preview-av {
+      background: var(--paper);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+    .preview-msg.user .preview-av {
+      background: var(--ink);
+      color: rgba(255,255,255,0.7);
+    }
+
+    .preview-bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      border-radius: 3px;
+    }
+    .preview-msg.assistant .preview-bubble {
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 3px 3px 3px 0;
+    }
+    .preview-msg.user .preview-bubble {
+      background: var(--ink);
+      color: rgba(255,255,255,0.9);
+      border-radius: 3px 3px 0 3px;
+    }
+
+    .preview-recs {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .preview-rec-label {
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 4px;
+    }
+    .preview-rec {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--paper);
+      border-left: 2px solid var(--warm);
+      border-radius: 0 2px 2px 0;
+    }
+    .preview-rec-num {
+      font-size: 10px;
+      color: var(--muted);
+      width: 16px;
+    }
+    .preview-rec-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* ── Stats row ────────────────────────────── */
+    .stats {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--line);
+      margin-top: 60px;
+    }
+    .stat {
+      flex: 1;
+      padding: 32px 60px;
+      border-right: 1px solid var(--line);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 36px;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-num em { font-style: italic; color: var(--warm); }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── Footer ───────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 18px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+    .footer-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--ink); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-brand">SHL <em>Advisor</em></div>
+    <div class="nav-links">
+      <a class="nav-link" href="/docs">API Docs</a>
+      <a class="nav-link" href="/health">Health</a>
+      <a class="nav-cta" href="/app">Open Advisor →</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">SHL Labs · AI Intern Assignment</div>
+      <h1 class="hero-heading">
+        Find the right<br>
+        assessment for<br>
+        <em>any</em> role.
+      </h1>
+      <p class="hero-body">
+        A conversational recommender grounded in SHL's catalog of 400+ individual test solutions. Describe a role, paste a job description, and receive a reasoned shortlist — in seconds.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="/app">Start a conversation</a>
+        <a class="btn-secondary" href="/docs">View API →</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="preview-card">
+        <div class="preview-header">
+          <div class="preview-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="preview-title">SHL Assessment Advisor</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-msg user">
+            <div class="preview-av">You</div>
+            <div class="preview-bubble">Senior Java engineer, 7 years experience. Microservices team.</div>
+          </div>
+          <div class="preview-msg assistant">
+            <div class="preview-av">SHL</div>
+            <div class="preview-bubble">For a senior IC backend role, here's a grounded battery covering technical depth and reasoning:</div>
+          </div>
+          <div class="preview-recs">
+            <div class="preview-rec-label">4 assessments recommended</div>
+            <div class="preview-rec">
+              <div class="preview-rec-num">01</div>
+              <div class="preview-rec-name">Core Java (Advanced Level) (New)</div>
+            </div>
+            <div class="preview-rec">
+              <div class="preview-rec-num">02</div>
+              <div class="preview-rec-name">Spring (New)</div>
+            </div>
+            <div class="preview-rec">
+              <div class="preview-rec-num">03</div>
+              <div class="preview-rec-name">SHL Verify Interactive G+</div>
+            </div>
+            <div class="preview-rec">
+              <div class="preview-rec-num">04</div>
+              <div class="preview-rec-name">Occupational Personality Questionnaire OPQ32r</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">400<em>+</em></div>
+      <div class="stat-label">Individual test solutions<br>from SHL's catalog</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1.0<em>0</em></div>
+      <div class="stat-label">Mean Recall@10 on<br>10 public test traces</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Turn conversation<br>budget enforced</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">&lt;2<em>s</em></div>
+      <div class="stat-label">Typical response time<br>via Groq inference</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-text">Built for SHL Labs AI Intern Assignment · 2026</div>
+    <div class="footer-links">
+      <a class="footer-link" href="/health">GET /health</a>
+      <a class="footer-link" href="/docs">POST /chat</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

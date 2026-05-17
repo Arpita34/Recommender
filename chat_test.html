@@ -1,66 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SHL — Assessment Advisor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
   <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink: #0e0e0e;
-      --paper: #f5f2ed;
-      --warm: #c9a84c;
-      --muted: #9a9690;
-      --line: #e2ddd6;
-      --chat-w: 660px;
+      --ink:    #0e0e0e;
+      --paper:  #f5f2ed;
+      --warm:   #c9a84c;
+      --muted:  #9a9690;
+      --line:   #e2ddd6;
+      --surface: #ffffff;
     }
 
-    html,
-    body {
-      height: 100%;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: 'DM Sans', system-ui, sans-serif;
-      font-size: 15px;
-      line-height: 1.6;
-    }
+    html, body { height: 100%; font-family: 'DM Sans', system-ui, sans-serif; }
 
-    /* ── Layout ─────────────────────────────────────────── */
-    .layout {
+    /* ── Full-page 2-col layout ── */
+    .app {
       display: grid;
       grid-template-columns: 260px 1fr;
       height: 100vh;
+      background: var(--surface);
     }
 
-    /* ── Sidebar ─────────────────────────────────────────── */
+    /* ── Sidebar ── */
     aside {
+      background: var(--paper);
       border-right: 1px solid var(--line);
-      padding: 40px 28px;
+      padding: 36px 24px;
       display: flex;
       flex-direction: column;
       gap: 0;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow: hidden;
+      overflow-y: auto;
     }
 
-    .brand {
-      margin-bottom: 48px;
-    }
-
+    .brand { margin-bottom: 44px; }
     .brand-label {
       font-size: 10px;
       font-weight: 500;
@@ -68,7 +47,6 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
     .brand-name {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: 22px;
@@ -76,37 +54,24 @@
       margin-top: 6px;
       color: var(--ink);
     }
+    .brand-name em { font-style: italic; color: var(--warm); }
 
-    .brand-name em {
-      font-style: italic;
-      color: var(--warm);
-    }
-
-    .side-section {
-      margin-bottom: 36px;
-    }
-
+    .side-section { margin-bottom: 32px; }
     .side-label {
       font-size: 10px;
       font-weight: 500;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-
     .side-hint {
       font-size: 13px;
       color: #6b6760;
       line-height: 1.65;
     }
 
-    .example-queries {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
+    .example-queries { display: flex; flex-direction: column; gap: 7px; }
     .eq {
       font-size: 12.5px;
       color: #7a7570;
@@ -116,19 +81,16 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
       line-height: 1.4;
+      background: var(--surface);
     }
+    .eq:hover { border-color: var(--warm); color: var(--ink); }
 
-    .eq:hover {
-      border-color: var(--warm);
-      color: var(--ink);
-    }
-
+    /* Turn budget at bottom of sidebar */
     .turn-block {
       margin-top: auto;
       padding-top: 20px;
       border-top: 1px solid var(--line);
     }
-
     .turn-label {
       font-size: 10px;
       letter-spacing: 0.12em;
@@ -136,34 +98,27 @@
       color: var(--muted);
       margin-bottom: 8px;
     }
-
-    .turn-bar-track {
-      height: 3px;
+    .turn-track {
+      height: 2px;
       background: var(--line);
       border-radius: 2px;
       overflow: hidden;
     }
-
-    .turn-bar-fill {
+    .turn-fill {
       height: 100%;
       background: var(--warm);
       border-radius: 2px;
       width: 0%;
       transition: width 0.3s ease;
     }
-
     .turn-count {
       font-size: 12px;
       color: var(--muted);
       margin-top: 6px;
     }
+    .turn-count span { color: var(--ink); font-weight: 500; }
 
-    .turn-count span {
-      color: var(--ink);
-      font-weight: 500;
-    }
-
-    /* ── Main ─────────────────────────────────────────── */
+    /* ── Main panel ── */
     main {
       display: flex;
       flex-direction: column;
@@ -171,521 +126,533 @@
       overflow: hidden;
     }
 
-    header {
-      padding: 24px 48px 20px;
-      border-bottom: 1px solid var(--line);
+    /* ── Top header ── */
+    .app-header {
+      background: var(--ink);
+      padding: 16px 28px;
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
       flex-shrink: 0;
     }
-
-    .header-title {
-      font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 17px;
-      color: var(--ink);
+    .header-mark {
+      width: 32px; height: 32px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-
-    .header-subtitle {
-      font-size: 12px;
-      color: var(--muted);
+    .header-mark svg { width: 14px; height: 14px; fill: var(--warm); }
+    .header-text h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: #fff;
+    }
+    .header-text p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 1px;
       letter-spacing: 0.04em;
     }
-
     .reset-btn {
-      background: none;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-family: inherit;
-      font-size: 12px;
-      padding: 6px 14px;
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.55);
+      font-family: 'DM Sans', inherit;
+      font-size: 11.5px;
+      padding: 6px 16px;
       border-radius: 2px;
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
+    .reset-btn:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
 
-    .reset-btn:hover {
-      border-color: #b5b0a8;
-      color: var(--ink);
-    }
-
-    /* ── Chat window ──────────────────────────────────── */
+    /* ── Chat area ── */
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding: 40px 48px;
+      padding: 28px 32px 12px;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 20px;
       scrollbar-width: thin;
       scrollbar-color: var(--line) transparent;
     }
 
-    .msg-row {
-      display: flex;
-      flex-direction: column;
-      max-width: var(--chat-w);
-      animation: rise 0.22s ease;
-    }
-
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    .msg-row.user {
-      align-self: flex-end;
-      align-items: flex-end;
-    }
-
-    .msg-row.assistant {
-      align-self: flex-start;
-      align-items: flex-start;
-    }
-
-    .msg-meta {
-      font-size: 10.5px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+    /* Welcome */
+    .welcome {
+      text-align: center;
+      padding: 48px 24px;
       color: var(--muted);
-      margin-bottom: 7px;
+    }
+    .welcome-rule {
+      width: 40px; height: 1.5px;
+      background: var(--warm);
+      margin: 0 auto 20px;
+    }
+    .welcome h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .welcome p {
+      font-size: 13.5px;
+      line-height: 1.7;
+      max-width: 380px;
+      margin: 0 auto;
+      color: #7a7570;
+    }
+
+    /* Messages */
+    .msg-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .msg-wrap.user { flex-direction: row-reverse; }
+
+    .msg-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .msg-wrap.assistant .msg-avatar {
+      background: var(--paper);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+    .msg-wrap.user .msg-avatar {
+      background: var(--ink);
+      color: rgba(255,255,255,0.7);
     }
 
     .bubble {
-      font-size: 14.5px;
-      line-height: 1.7;
-      max-width: var(--chat-w);
-    }
-
-    .msg-row.user .bubble {
-      background: var(--ink);
-      color: var(--paper);
-      padding: 14px 20px;
-      border-radius: 2px 2px 0 2px;
-    }
-
-    .msg-row.assistant .bubble {
-      color: var(--ink);
-      padding: 0;
-    }
-
-    /* ── Recommendations ─────────────────────────────── */
-    .recs {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      border-top: 1px solid var(--line);
-      width: 100%;
-      max-width: var(--chat-w);
-    }
-
-    .recs-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--warm);
-      padding: 14px 0 10px;
-    }
-
-    .rec-item {
-      display: grid;
-      grid-template-columns: 28px 1fr auto;
-      align-items: start;
-      gap: 0 14px;
-      padding: 13px 0;
-      border-bottom: 1px solid var(--line);
-      text-decoration: none;
-      color: inherit;
-      transition: background 0.12s;
-    }
-
-    .rec-item:hover {
-      background: transparent;
-    }
-
-    .rec-item:hover .rec-name {
-      color: var(--warm);
-    }
-
-    .rec-num {
-      font-size: 11px;
-      color: var(--muted);
-      padding-top: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .rec-name {
+      max-width: 68%;
+      padding: 10px 15px;
       font-size: 14px;
-      font-weight: 500;
-      line-height: 1.3;
-      transition: color 0.15s;
+      line-height: 1.65;
+      border-radius: 18px;
+    }
+    .msg-wrap.assistant .bubble {
+      background: var(--paper);
+      color: var(--ink);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-wrap.user .bubble {
+      background: var(--ink);
+      color: rgba(255,255,255,0.92);
+      border-bottom-right-radius: 4px;
     }
 
-    .rec-type {
+    /* Recommendations */
+    .recs-outer {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      animation: slideUp 0.2s ease;
+    }
+    .recs-spacer { width: 28px; flex-shrink: 0; }
+    .recs-container { flex: 1; max-width: calc(68% + 40px); }
+    .recs-heading {
       font-size: 10px;
-      letter-spacing: 0.12em;
+      font-weight: 500;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--muted);
-      background: var(--line);
-      padding: 3px 8px;
+      color: var(--warm);
+      margin-bottom: 10px;
+    }
+    .rec-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 2.5px solid var(--warm);
       border-radius: 2px;
-      white-space: nowrap;
-      margin-top: 2px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 7px;
+      transition: border-color 0.15s;
+      text-decoration: none;
+    }
+    .rec-card:hover { border-color: var(--ink); border-left-color: var(--ink); }
+    .rec-num {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      padding-top: 1px;
+      width: 18px;
+      flex-shrink: 0;
+    }
+    .rec-body { flex: 1; }
+    .rec-name {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .rec-type-badge {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warm);
+      border: 1px solid #e8d9a8;
+      background: #fdf8ec;
+      border-radius: 2px;
+      padding: 2px 7px;
+      margin-top: 5px;
     }
 
-    /* ── Typing indicator ──────────────────────────── */
-    .typing-dots {
+    /* Typing */
+    .typing-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      animation: slideUp 0.2s ease;
+    }
+    .typing-bubble {
+      background: var(--paper);
+      border-radius: 3px 3px 3px 0;
+      padding: 13px 18px;
       display: flex;
       gap: 5px;
-      padding: 14px 0;
       align-items: center;
     }
-
-    .typing-dots span {
-      width: 6px;
-      height: 6px;
+    .dot {
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--muted);
       animation: pulse 1.2s infinite;
     }
-
-    .typing-dots span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .typing-dots span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes pulse {
-
-      0%,
-      80%,
-      100% {
-        transform: scale(0.6);
-        opacity: 0.4;
-      }
-
-      40% {
-        transform: scale(1);
-        opacity: 1;
-      }
+      0%,80%,100% { transform: scale(0.65); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    /* ── End banner ──────────────────────────────── */
-    .end-banner {
-      max-width: var(--chat-w);
-      padding: 16px 20px;
+    /* End banner */
+    .end-notice {
+      padding: 13px 18px;
       border-left: 2px solid var(--warm);
-      background: #faf8f4;
+      background: #faf8f3;
       font-size: 13px;
       color: #6b6760;
-      line-height: 1.5;
+      border-radius: 0 2px 2px 0;
     }
 
-    /* ── Input area ──────────────────────────────── */
+    /* Input area */
     .input-area {
+      padding: 14px 32px 18px;
       border-top: 1px solid var(--line);
-      padding: 20px 48px 24px;
-      flex-shrink: 0;
-    }
-
-    .input-wrap {
       display: flex;
       gap: 12px;
       align-items: flex-end;
-      max-width: var(--chat-w);
-    }
-
-    textarea {
-      flex: 1;
-      background: transparent;
-      border: none;
-      border-bottom: 1.5px solid var(--line);
-      color: var(--ink);
-      font-family: 'DM Sans', inherit;
-      font-size: 14.5px;
-      line-height: 1.6;
-      padding: 10px 0;
-      resize: none;
-      outline: none;
-      transition: border-color 0.2s;
-      min-height: 44px;
-      max-height: 120px;
-    }
-
-    textarea:focus {
-      border-color: var(--ink);
-    }
-
-    textarea::placeholder {
-      color: #bbb8b2;
-    }
-
-    .send-btn {
-      background: var(--ink);
-      border: none;
-      color: var(--paper);
-      font-family: 'DM Sans', inherit;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      padding: 10px 20px;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
       flex-shrink: 0;
     }
-
-    .send-btn:hover {
-      background: #2a2a2a;
+    textarea {
+      flex: 1;
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: 3px;
+      color: var(--ink);
+      font-family: 'DM Sans', inherit;
+      font-size: 14px;
+      padding: 11px 16px;
+      resize: none;
+      outline: none;
+      line-height: 1.55;
+      max-height: 100px;
+      transition: border-color 0.2s, background 0.2s;
     }
+    textarea:focus { border-color: var(--ink); background: var(--surface); }
+    textarea::placeholder { color: #c0bcb6; }
 
-    .send-btn:disabled {
-      background: var(--line);
-      color: var(--muted);
-      cursor: default;
+    .send-btn {
+      width: 42px; height: 42px;
+      border-radius: 3px;
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
     }
+    .send-btn:hover { background: #2a2a2a; }
+    .send-btn:disabled { background: var(--line); cursor: default; }
+    .send-btn svg { width: 16px; height: 16px; fill: white; }
 
     .input-hint {
       font-size: 11px;
       color: #c0bcb6;
-      margin-top: 8px;
+      padding: 0 32px 10px;
+      flex-shrink: 0;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="layout">
+<div class="app">
 
-    <!-- ── Sidebar ── -->
-    <aside>
-      <div class="brand">
-        <div class="brand-label">SHL Labs</div>
-        <div class="brand-name">Assessment<br><em>Advisor</em></div>
+  <!-- ── Sidebar ── -->
+  <aside>
+    <div class="brand">
+      <div class="brand-label">SHL Labs</div>
+      <div class="brand-name">Assessment<br><em>Advisor</em></div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-label">What this does</div>
+      <div class="side-hint">
+        Describe your hiring need in plain English. The advisor will clarify when needed and return a grounded shortlist from SHL's catalog of 400+ individual test solutions.
       </div>
+    </div>
 
-      <div class="side-section">
-        <div class="side-label">What this does</div>
-        <div class="side-hint">
-          Describe your hiring need in plain English. The advisor will clarify when needed and return a grounded
-          shortlist from SHL's catalog of 400+ individual test solutions.
-        </div>
+    <div class="side-section">
+      <div class="side-label">Try asking</div>
+      <div class="example-queries">
+        <div class="eq" onclick="prefill('We need cognitive and personality tests for a graduate management trainee scheme.')">Graduate management trainees — cognitive + personality</div>
+        <div class="eq" onclick="prefill('Senior Java developer with 7+ years of experience, backend microservices.')">Senior Java engineer, 7+ years</div>
+        <div class="eq" onclick="prefill('Screening 500 entry-level contact centre agents in the US.')">High-volume contact centre screening</div>
+        <div class="eq" onclick="prefill('Plant operators at a chemical facility. Safety compliance is the top priority.')">Safety-critical plant operators</div>
       </div>
+    </div>
 
-      <div class="side-section">
-        <div class="side-label">Try asking</div>
-        <div class="example-queries">
-          <div class="eq"
-            onclick="prefill('We need cognitive and personality tests for a graduate management trainee scheme.')">
-            Graduate management trainees — cognitive + personality</div>
-          <div class="eq" onclick="prefill('Hiring a senior Java backend engineer with 7 years experience.')">Senior
-            Java engineer, 7 years exp.</div>
-          <div class="eq" onclick="prefill('Screening 500 entry-level contact centre agents in the US.')">High-volume
-            contact centre screening</div>
-          <div class="eq"
-            onclick="prefill('Plant operators for a chemical facility. Safety compliance is the top priority.')">
-            Safety-critical plant operators</div>
-        </div>
+    <div class="turn-block">
+      <div class="turn-label">Conversation budget</div>
+      <div class="turn-track">
+        <div class="turn-fill" id="turn-fill"></div>
       </div>
+      <div class="turn-count"><span id="turn-num">0</span> of 8 messages used</div>
+    </div>
+  </aside>
 
-      <div class="turn-block">
-        <div class="turn-label">Conversation budget</div>
-        <div class="turn-bar-track">
-          <div class="turn-bar-fill" id="turn-fill"></div>
-        </div>
-        <div class="turn-count"><span id="turn-num">0</span> of 8 messages used</div>
+  <!-- ── Main ── -->
+  <main>
+    <div class="app-header">
+      <div class="header-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
-    </aside>
-
-    <!-- ── Main ── -->
-    <main>
-      <header>
-        <div>
-          <div class="header-title">New conversation</div>
-          <div class="header-subtitle">Individual Test Solutions · SHL product catalog</div>
-        </div>
-        <button class="reset-btn" onclick="resetChat()">Start over</button>
-      </header>
-
-      <div id="chat"></div>
-
-      <div class="input-area">
-        <div class="input-wrap">
-          <textarea id="input" rows="1" placeholder="Describe the role you're hiring for…" onkeydown="handleKey(event)"
-            oninput="autoResize(this)"></textarea>
-          <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
-        </div>
-        <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
+      <div class="header-text">
+        <h1>SHL Assessment <em style="font-style:italic;color:var(--warm)">Advisor</em></h1>
+        <p>Individual Test Solutions · 400+ assessments</p>
       </div>
-    </main>
+      <button class="reset-btn" onclick="resetChat()">New conversation</button>
+    </div>
 
-  </div>
+    <div id="chat">
+      <div class="welcome">
+        <div class="welcome-rule"></div>
+        <h2>How can I help you hire?</h2>
+        <p>Describe the role — job title, years of experience, or paste a full job description. I'll return a grounded shortlist from SHL's catalog.</p>
+      </div>
+    </div>
 
-  <script>
-    let messages = [];
-    const TYPE_LABELS = { K: 'Knowledge', P: 'Personality', A: 'Ability', B: 'Situational', C: 'Competency', S: 'Simulation', E: 'Exercises', D: 'Development' };
+    <div class="input-area">
+      <textarea
+        id="input"
+        rows="1"
+        placeholder="Describe the role you're hiring for…"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+  </main>
 
-    function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-    }
+</div>
 
-    function prefill(text) {
-      const el = document.getElementById('input');
-      el.value = text;
-      autoResize(el);
-      el.focus();
-    }
+<script>
+  let messages = [];
 
-    function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    }
+  const TYPE_MAP = {
+    K:'Knowledge & Skills', P:'Personality', A:'Ability & Aptitude',
+    B:'Situational Judgment', C:'Competencies', S:'Simulation',
+    E:'Assessment Exercises', D:'Development & 360'
+  };
 
-    function updateTurns() {
-      const n = messages.length;
-      document.getElementById('turn-num').textContent = n;
-      document.getElementById('turn-fill').style.width = (n / 8 * 100) + '%';
-    }
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
 
-    async function sendMessage() {
-      const input = document.getElementById('input');
-      const text = input.value.trim();
-      const btn = document.getElementById('send-btn');
-      if (!text || btn.disabled) return;
+  function prefill(text) {
+    const el = document.getElementById('input');
+    el.value = text;
+    autoResize(el);
+    el.focus();
+  }
 
-      input.value = '';
-      input.style.height = 'auto';
-      messages.push({ role: 'user', content: text });
-      appendMsg('user', text);
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function updateTurns() {
+    const n = messages.length;
+    document.getElementById('turn-num').textContent = n;
+    document.getElementById('turn-fill').style.width = (n / 8 * 100) + '%';
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const btn   = document.getElementById('send-btn');
+    const text  = input.value.trim();
+    if (!text || btn.disabled) return;
+
+    const welcome = document.querySelector('.welcome');
+    if (welcome) welcome.remove();
+
+    input.value = '';
+    input.style.height = 'auto';
+    messages.push({ role: 'user', content: text });
+    addBubble('user', text);
+    updateTurns();
+    btn.disabled = true;
+
+    const typing = addTyping();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      const data = await res.json();
+      typing.remove();
+      messages.push({ role: 'assistant', content: data.reply });
+      addBubble('assistant', data.reply, data.recommendations);
       updateTurns();
 
-      btn.disabled = true;
-      const typingEl = appendTyping();
-
-      try {
-        const res = await fetch('http://localhost:8000/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages })
-        });
-        const data = await res.json();
-        typingEl.remove();
-        messages.push({ role: 'assistant', content: data.reply });
-        appendMsg('assistant', data.reply, data.recommendations);
-        updateTurns();
-
-        if (data.end_of_conversation) {
-          appendEnd();
-          btn.disabled = true;
-          input.disabled = true;
-          return;
-        }
-      } catch {
-        typingEl.remove();
-        appendMsg('assistant', 'The server isn\'t responding. Make sure uvicorn is running on port 8000.');
+      if (data.end_of_conversation) {
+        const chat = document.getElementById('chat');
+        const banner = document.createElement('div');
+        banner.className = 'end-notice';
+        banner.textContent = 'Assessment shortlist confirmed. Click "New conversation" to start another search.';
+        chat.appendChild(banner);
+        btn.disabled = true;
+        input.disabled = true;
+        scrollDown();
+        return;
       }
-
-      btn.disabled = false;
-      document.getElementById('input').focus();
-      scrollDown();
+    } catch {
+      typing.remove();
+      addBubble('assistant', 'The server is not responding. Make sure uvicorn is running on port 8000.');
     }
 
-    function appendMsg(role, text, recs) {
-      const chat = document.getElementById('chat');
-      const row = document.createElement('div');
-      row.className = `msg-row ${role}`;
+    btn.disabled = false;
+    input.focus();
+    scrollDown();
+  }
 
-      const meta = document.createElement('div');
-      meta.className = 'msg-meta';
-      meta.textContent = role === 'user' ? 'You' : 'SHL Advisor';
-      row.appendChild(meta);
+  function addBubble(role, text, recs) {
+    const chat = document.getElementById('chat');
 
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = text;
-      row.appendChild(bubble);
+    const wrap = document.createElement('div');
+    wrap.className = `msg-wrap ${role}`;
 
-      if (recs && recs.length > 0) {
-        const recsEl = document.createElement('div');
-        recsEl.className = 'recs';
+    const av = document.createElement('div');
+    av.className = 'msg-avatar';
+    av.textContent = role === 'user' ? 'You' : 'SHL';
+    wrap.appendChild(av);
 
-        const label = document.createElement('div');
-        label.className = 'recs-label';
-        label.textContent = `${recs.length} assessment${recs.length > 1 ? 's' : ''} recommended`;
-        recsEl.appendChild(label);
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    chat.appendChild(wrap);
 
-        recs.forEach((r, i) => {
-          const item = document.createElement('a');
-          item.className = 'rec-item';
-          item.href = r.url;
-          item.target = '_blank';
-          item.rel = 'noopener';
+    if (recs && recs.length > 0) {
+      const outer = document.createElement('div');
+      outer.className = 'recs-outer';
 
-          const codes = r.test_type ? r.test_type.split(',') : [];
-          const typeLabel = codes.map(c => TYPE_LABELS[c.trim()] || c.trim()).join(' · ');
+      const spacer = document.createElement('div');
+      spacer.className = 'recs-spacer';
+      outer.appendChild(spacer);
 
-          item.innerHTML = `
+      const container = document.createElement('div');
+      container.className = 'recs-container';
+
+      const heading = document.createElement('div');
+      heading.className = 'recs-heading';
+      heading.textContent = `${recs.length} assessment${recs.length > 1 ? 's' : ''} recommended`;
+      container.appendChild(heading);
+
+      recs.forEach((r, i) => {
+        const card = document.createElement('a');
+        card.className = 'rec-card';
+        card.href = r.url;
+        card.target = '_blank';
+        card.rel = 'noopener';
+
+        const codes = (r.test_type || '').split(',').map(c => TYPE_MAP[c.trim()] || c.trim()).filter(Boolean);
+        const typeLabel = codes[0] || 'Assessment';
+
+        card.innerHTML = `
           <div class="rec-num">${String(i + 1).padStart(2, '0')}</div>
-          <div class="rec-name">${r.name}</div>
-          <div class="rec-type">${typeLabel || 'Assessment'}</div>`;
-          recsEl.appendChild(item);
-        });
+          <div class="rec-body">
+            <div class="rec-name">${r.name}</div>
+            <div class="rec-type-badge">${typeLabel}</div>
+          </div>`;
+        container.appendChild(card);
+      });
 
-        row.appendChild(recsEl);
-      }
-
-      chat.appendChild(row);
-      scrollDown();
+      outer.appendChild(container);
+      chat.appendChild(outer);
     }
 
-    function appendTyping() {
-      const chat = document.getElementById('chat');
-      const row = document.createElement('div');
-      row.className = 'msg-row assistant';
-      row.innerHTML = `
-      <div class="msg-meta">SHL Advisor</div>
-      <div class="typing-dots"><span></span><span></span><span></span></div>`;
-      chat.appendChild(row);
-      scrollDown();
-      return row;
-    }
+    scrollDown();
+  }
 
-    function appendEnd() {
-      const chat = document.getElementById('chat');
-      const banner = document.createElement('div');
-      banner.className = 'end-banner';
-      banner.textContent = 'The conversation is complete. Use "Start over" to begin a new assessment search.';
-      chat.appendChild(banner);
-      scrollDown();
-    }
+  function addTyping() {
+    const chat = document.getElementById('chat');
+    const wrap = document.createElement('div');
+    wrap.className = 'typing-wrap';
+    wrap.innerHTML = `
+      <div class="msg-avatar" style="background:var(--paper);border:1px solid var(--line);color:var(--muted);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;border-radius:2px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">SHL</div>
+      <div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    chat.appendChild(wrap);
+    scrollDown();
+    return wrap;
+  }
 
-    function scrollDown() {
-      const chat = document.getElementById('chat');
-      chat.scrollTop = chat.scrollHeight;
-    }
+  function scrollDown() {
+    const chat = document.getElementById('chat');
+    chat.scrollTop = chat.scrollHeight;
+  }
 
-    function resetChat() {
-      messages = [];
-      document.getElementById('chat').innerHTML = '';
-      updateTurns();
-      const btn = document.getElementById('send-btn');
-      const inp = document.getElementById('input');
-      btn.disabled = false;
-      inp.disabled = false;
-      inp.focus();
-    }
-  </script>
+  function resetChat() {
+    messages = [];
+    const chat = document.getElementById('chat');
+    chat.innerHTML = `
+      <div class="welcome">
+        <div class="welcome-rule"></div>
+        <h2>How can I help you hire?</h2>
+        <p>Describe the role — job title, years of experience, or paste a full job description. I'll return a grounded shortlist from SHL's catalog.</p>
+      </div>`;
+    updateTurns();
+    document.getElementById('send-btn').disabled = false;
+    const inp = document.getElementById('input');
+    inp.disabled = false;
+    inp.focus();
+  }
+</script>
 </body>
-
 </html>
