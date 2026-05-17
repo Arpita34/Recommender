@@ -19,7 +19,7 @@ class AgentOrchestrator:
     def __init__(self):
         self.catalog = load_catalog('data/catalog.json')
         self.retriever = Retriever('data/faiss_index')
-        self.model_name = os.environ.get("LLM_MODEL", "llama3-70b-8192")
+        self.model_name = os.environ.get("LLM_MODEL", "llama-3.3-70b-versatile")
 
     async def handle(self, messages) -> ChatResponse:
         turn_count = len(messages)
