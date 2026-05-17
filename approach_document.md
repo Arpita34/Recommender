@@ -2,52 +2,66 @@
 
 ## 1. Design Choices
 
-**Stack:** FastAPI (stateless REST), FAISS (local vector search), Groq Llama 3.3-70b-versatile (LLM inference), sentence-transformers all-MiniLM-L6-v2 (embeddings), Python 3.8.
+**Stack:** FastAPI, FAISS + BM25 (hybrid retrieval), Groq Llama 3.3-70b-versatile, sentence-transformers all-MiniLM-L6-v2, Docker on Render.
 
-**Why Groq over Gemini/GPT-4:** Groq delivers ~200 tok/s inference — roughly 5–10× faster than hosted alternatives. Given the 30-second timeout per call, speed was the primary selection criterion. The free tier handles evaluation traffic without rate limiting.
+- **Groq** was chosen for inference speed (~200 tok/s). With a 30-second timeout per call, this leaves comfortable headroom. The free tier handles evaluation traffic without rate limits.
+- **FAISS** loads from a binary file in <1s with no external services — simpler than ChromaDB in a Docker container.
+- **Single LLM call per turn** combines intent classification, context extraction, and response generation. Sequential calls would risk the timeout budget.
 
-**Why FAISS over ChromaDB:** FAISS loads from a binary file in under a second, with zero network dependencies. ChromaDB requires a running server process, adding deployment complexity inside a Docker container.
-
-**Why a single LLM call:** Sequential LLM calls cost 2–5 seconds each. Combining intent classification, context extraction, and response generation into one call keeps latency comfortably within the 30-second budget.
-
-**Catalog source:** Initially scraped SHL's product catalog using httpx + BeautifulSoup with paginated requests. The scraper only returned ~24 assessments from the static HTML. Switched to directly downloading the official JSON catalog from SHL's internal API endpoint, which yielded 400+ assessments with accurate metadata (duration, job levels, languages, test type keys). All URLs were patched from `/products/` to `/solutions/products/` to match the live site.
+**Catalog:** The SHL product catalog page only exposes ~24 items via static HTML. I switched to SHL's internal JSON endpoint (`shl_product_catalog.json`), which returned 400+ Individual Test Solutions with structured metadata (duration, job levels, languages, test type keys). URLs were normalized from `/products/` to `/solutions/products/` to match the live site.
 
 ## 2. Retrieval Setup
 
-Each catalog entry is embedded by concatenating its name, description, keys (test types), and job levels into a single string. Vectors are stored in a `faiss.IndexFlatIP` index (inner product ≈ cosine similarity on normalized vectors). At query time, all user messages in the conversation are concatenated and used as the retrieval query, returning top-10 candidates.
+**Indexing:** Each catalog entry is embedded by concatenating its name, description, test type keys, and job levels. Vectors are stored in a `faiss.IndexFlatIP` index (inner product on L2-normalized vectors ≈ cosine similarity).
 
-The retrieved names are injected into the system prompt as a JSON catalog context. After the LLM responds, a **hallucination guard** resolves every name in `recommended_names` against the in-memory catalog — any name not present is silently dropped. This means the agent can never return a URL it invented.
+**Hybrid Search (Dense + BM25):** At query time, all user messages are concatenated into a single retrieval query. Two searches run in parallel:
+
+1. **Dense (FAISS):** Semantic similarity — captures intent like "leadership assessment" matching "OPQ Leadership Report."
+2. **Lexical (BM25):** Exact keyword matching — catches specific product names and technical skills like "SAP ABAP", "Core Java", or "OPQ32r" that embeddings handle poorly.
+
+Results are merged using **Reciprocal Rank Fusion (RRF)** with k=60, returning the top-10 candidates. This consistently outperformed dense-only retrieval on queries containing exact product names.
+
+**Hallucination Guard:** After the LLM responds, every name in `recommended_names` is resolved against the in-memory catalog. Any name not found is silently dropped. The agent cannot return a URL it invented.
 
 ## 3. Prompt Design
 
-The system prompt enforces ten explicit rules covering:
-- Catalog-grounding (only names from the injected context)
-- JD extraction behavior (extract role/seniority/competencies silently, recommend in the same reply)
-- Turn budget awareness (8 total messages; recommend by turn 6 at the latest)
-- Experience-to-seniority mapping (0–2 yrs → Entry, 3–5 → Mid, 6+ → Senior)
-- Refusal policy (off-topic, legal questions, prompt injection attempts)
-- Comparison behavior (use catalog data only, not model priors)
+The system prompt is structured around seven responsibilities:
 
-The output schema is enforced via Groq's `response_format={"type": "json_object"}` parameter, guaranteeing parseable JSON on every call.
+- **Grounding:** Only recommend from the injected catalog context.
+- **JD Handling:** If a job description is provided, extract role/seniority/competencies internally and recommend in the same reply — no separate extraction step.
+- **Turn Budget:** The 8-turn cap is explicitly stated. The agent prioritizes early recommendations and avoids filler turns.
+- **Seniority Inference:** 0–2 yrs → Entry, 3–5 → Mid, 6+ → Senior. If years are mentioned, seniority is inferred automatically.
+- **Scope Enforcement:** Off-topic questions, legal queries, and prompt injection attempts are refused politely.
+- **Refinement:** Constraints changed mid-conversation update the shortlist rather than restarting.
+- **Comparison:** Answered using catalog data only, not model priors.
 
-**What didn't work:**
-- Early versions asked for seniority even when years of experience were already mentioned. Fixed by adding an explicit experience-to-seniority mapping with a rule to never re-ask.
-- When a JD was pasted, the agent would summarise what it extracted as a separate message without recommendations, wasting a turn. Fixed by adding a mandatory JD response structure rule: extract silently, recommend immediately in the same reply.
-- `llama3-70b-8192` was decommissioned by Groq mid-build. Switched to `llama-3.3-70b-versatile`.
+JSON output is enforced via Groq's `response_format={"type": "json_object"}`, guaranteeing parseable responses on every call.
 
-## 4. Evaluation Approach
+## 4. What Didn't Work
 
-**Local evaluation:** A `scripts/evaluate.py` replay harness reads the 10 public conversation traces (C1–C10), simulates multi-turn conversations against the live `/chat` endpoint, and computes Recall@10 per trace. Mean Recall@10 on the public traces reached **1.000** after switching to the official API catalog.
+- **Redundant seniority questions:** Early prompts asked for seniority even when years of experience were already stated. Fixed by adding an explicit mapping rule.
+- **JD summarization instead of action:** When a JD was pasted, the agent would spend a turn restating what it extracted before recommending. Fixed by requiring immediate recommendations in the same reply.
+- **Dense-only retrieval missed exact names:** Queries like "OPQ32r" or "Core Java" returned semantically similar but wrong assessments. Adding BM25 as a second signal resolved this.
+- **Model decommissioned:** `llama3-70b-8192` was retired by Groq mid-development. Switched to `llama-3.3-70b-versatile`.
+- **Render OOM on free tier:** The 512MB memory limit was exceeded during startup when the embedding model was downloaded at runtime. Fixed by pre-downloading the model during Docker build and setting `MALLOC_ARENA_MAX=2`.
 
-**Behavioral probes tested manually:**
-- Vague query on turn 1 → `recommendations: []` with clarifying question ✅
-- Prompt injection attempt → polite refusal, `recommendations: []` ✅
-- Off-topic question (legal advice) → in-scope refusal ✅
-- JD pasted → immediate recommendations without asking for confirmation ✅
-- Mid-conversation refinement → shortlist updates without restarting ✅
+## 5. Evaluation
 
-**What was measured:** After each prompt change, the public traces were re-evaluated to confirm Recall@10 did not drop. Behavioral probes were re-tested manually via a local chat UI (`chat_test.html`) built to avoid manual JSON construction in Swagger.
+**Automated:** A replay harness (`scripts/evaluate.py`) reads the 10 public conversation traces, runs multi-turn conversations against the live `/chat` endpoint, and computes Recall@10 per trace. Mean Recall@10 = **1.00** on all 10 public traces.
 
-## 5. AI Tools Used
+**Manual behavioral probes:**
 
-**Antigravity (agentic coding assistant)** was used for: scaffolding FastAPI boilerplate, writing the FAISS index builder, drafting the initial system prompt, converting 10 markdown conversation traces to JSON evaluation fixtures, and iterating on prompt rules based on observed failure modes. All design decisions, stack choices, and debugging were directed and validated by me.
+| Probe | Result |
+|---|---|
+| Vague query on turn 1 → clarifying question, no recommendations | ✅ |
+| Prompt injection → polite refusal | ✅ |
+| Off-topic question → scoped refusal | ✅ |
+| Full JD pasted → immediate recommendations | ✅ |
+| Mid-conversation refinement → updated shortlist | ✅ |
+| Assessment comparison → grounded in catalog data | ✅ |
+
+After each prompt or retrieval change, public traces were re-evaluated to confirm Recall@10 did not regress.
+
+## 6. AI Tools Used
+
+**Antigravity (agentic coding assistant)** was used for: scaffolding FastAPI boilerplate, writing the FAISS index builder, drafting the initial system prompt, iterating on prompt rules based on observed failure modes, and building the evaluation harness. All architecture decisions, stack selection, and debugging were directed and validated by me.
