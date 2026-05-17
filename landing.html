@@ -6,324 +6,419 @@
   <title>SHL Assessment Advisor</title>
   <meta name="description" content="AI-powered assessment recommender built on SHL's catalog of 400+ individual test solutions."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink:   #0e0e0e;
-      --paper: #f5f2ed;
-      --warm:  #c9a84c;
-      --muted: #9a9690;
-      --line:  #e2ddd6;
+      --ink:    #0e0e0e;
+      --paper:  #f5f2ed;
+      --warm:   #c9a84c;
+      --muted:  #9a9690;
+      --line:   #e2ddd6;
+      --surface:#ffffff;
     }
 
     html, body {
       height: 100%;
       font-family: 'DM Sans', system-ui, sans-serif;
-      background: var(--paper);
+      background: var(--ink);
       color: var(--ink);
     }
 
-    /* ── Layout ───────────────────────────────── */
-    .page {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* ── Top bar ──────────────────────────────── */
+    /* ── NAV ─────────────────────────────────── */
     nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 22px 60px;
-      border-bottom: 1px solid var(--line);
+      padding: 18px 64px;
+      background: rgba(14,14,14,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
     .nav-brand {
       font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 17px;
-      color: var(--ink);
-      letter-spacing: 0.01em;
+      font-size: 18px;
+      color: #fff;
     }
     .nav-brand em { font-style: italic; color: var(--warm); }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
     .nav-link {
       font-size: 13px;
-      color: var(--muted);
+      color: rgba(255,255,255,0.45);
       text-decoration: none;
       transition: color 0.15s;
     }
-    .nav-link:hover { color: var(--ink); }
+    .nav-link:hover { color: rgba(255,255,255,0.9); }
     .nav-cta {
       font-size: 13px;
       font-weight: 500;
       color: var(--ink);
-      background: transparent;
-      border: 1.5px solid var(--ink);
-      padding: 8px 20px;
+      background: var(--warm);
+      padding: 8px 22px;
       border-radius: 2px;
       text-decoration: none;
-      transition: background 0.15s, color 0.15s;
+      transition: opacity 0.15s;
+      letter-spacing: 0.02em;
     }
-    .nav-cta:hover { background: var(--ink); color: var(--paper); }
+    .nav-cta:hover { opacity: 0.88; }
 
-    /* ── Hero ─────────────────────────────────── */
+    /* ── HERO ────────────────────────────────── */
     .hero {
+      min-height: 100vh;
+      background: var(--ink);
       display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 60px;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      padding: 80px 60px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
+      padding: 120px 64px 80px;
+      gap: 80px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .hero-left {}
+    /* Subtle grid texture */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
 
     .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-size: 11px;
       font-weight: 500;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--warm);
-      margin-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1.5px;
+      background: var(--warm);
     }
 
     .hero-heading {
       font-family: 'DM Serif Display', Georgia, serif;
-      font-size: clamp(38px, 4.5vw, 56px);
-      line-height: 1.1;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-      margin-bottom: 24px;
+      font-size: clamp(44px, 5vw, 68px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 28px;
     }
-    .hero-heading em { font-style: italic; color: var(--warm); }
+    .hero-heading em {
+      font-style: italic;
+      color: var(--warm);
+    }
 
     .hero-body {
       font-size: 16px;
-      line-height: 1.75;
-      color: #6b6760;
-      max-width: 460px;
-      margin-bottom: 40px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.45);
+      max-width: 440px;
+      margin-bottom: 48px;
     }
 
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .hero-actions { display: flex; align-items: center; gap: 20px; }
+
     .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       font-family: 'DM Sans', inherit;
       font-size: 14px;
       font-weight: 500;
-      color: var(--paper);
-      background: var(--ink);
+      color: var(--ink);
+      background: var(--warm);
       border: none;
       padding: 14px 28px;
       border-radius: 2px;
       text-decoration: none;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: opacity 0.15s, transform 0.15s;
       letter-spacing: 0.02em;
     }
-    .btn-primary:hover { background: #2a2a2a; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary svg { width: 14px; height: 14px; fill: var(--ink); }
 
-    .btn-secondary {
-      font-size: 13.5px;
-      color: var(--muted);
+    .btn-ghost {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
       text-decoration: none;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
       padding-bottom: 1px;
       transition: color 0.15s, border-color 0.15s;
     }
-    .btn-secondary:hover { color: var(--ink); border-color: var(--ink); }
+    .btn-ghost:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.4); }
 
-    /* ── Chat preview card ──────────────────── */
-    .hero-right {}
+    /* ── Preview card (right side) ───────────── */
+    .hero-right { position: relative; z-index: 1; }
 
     .preview-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
       overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
     }
-    .preview-header {
-      background: var(--ink);
-      padding: 14px 20px;
+
+    .preview-titlebar {
+      background: #111;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
-    .preview-dots {
-      display: flex; gap: 6px;
-    }
-    .preview-dots span {
+    .traffic-lights { display: flex; gap: 6px; }
+    .tl {
       width: 10px; height: 10px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.15);
     }
-    .preview-title {
+    .tl-r { background: #ff5f57; }
+    .tl-y { background: #febc2e; }
+    .tl-g { background: #28c840; }
+    .preview-url {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      font-family: monospace;
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    /* Sidebar preview */
+    .preview-inner {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      height: 340px;
+    }
+    .preview-sidebar {
+      background: #161616;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .ps-brand {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: 13px;
-      color: rgba(255,255,255,0.8);
-      margin-left: 4px;
+      color: #fff;
+      margin-bottom: 18px;
     }
-
-    .preview-body {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .preview-msg {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-    .preview-msg.user { flex-direction: row-reverse; }
-
-    .preview-av {
-      width: 26px; height: 26px;
-      border-radius: 2px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    .preview-msg.assistant .preview-av {
-      background: var(--paper);
-      color: var(--muted);
-      border: 1px solid var(--line);
-    }
-    .preview-msg.user .preview-av {
-      background: var(--ink);
-      color: rgba(255,255,255,0.7);
-    }
-
-    .preview-bubble {
-      max-width: 78%;
-      padding: 10px 14px;
-      font-size: 12.5px;
-      line-height: 1.55;
-      border-radius: 3px;
-    }
-    .preview-msg.assistant .preview-bubble {
-      background: var(--paper);
-      color: var(--ink);
-      border-radius: 3px 3px 3px 0;
-    }
-    .preview-msg.user .preview-bubble {
-      background: var(--ink);
-      color: rgba(255,255,255,0.9);
-      border-radius: 3px 3px 0 3px;
-    }
-
-    .preview-recs {
-      border-top: 1px solid var(--line);
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .preview-rec-label {
-      font-size: 9.5px;
-      font-weight: 500;
+    .ps-brand em { color: var(--warm); font-style: italic; }
+    .ps-label {
+      font-size: 8.5px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--warm);
-      margin-bottom: 4px;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 8px;
     }
-    .preview-rec {
+    .ps-item {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      padding: 7px 8px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 2px;
+      margin-bottom: 5px;
+      line-height: 1.35;
+    }
+    .ps-bar-wrap {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .ps-bar-label {
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 6px;
+    }
+    .ps-bar { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; }
+    .ps-bar-fill { height: 100%; width: 37.5%; background: var(--warm); border-radius: 1px; }
+
+    .preview-chat {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      gap: 10px;
+      overflow: hidden;
+    }
+    .pc-msg {
+      display: flex;
+      gap: 7px;
+      align-items: flex-end;
+    }
+    .pc-msg.user { flex-direction: row-reverse; }
+    .pc-av {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pc-msg.assistant .pc-av { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+    .pc-msg.user .pc-av { background: var(--ink); color: rgba(255,255,255,0.7); }
+    .pc-bubble {
+      max-width: 78%;
+      padding: 7px 11px;
+      font-size: 11px;
+      line-height: 1.5;
+      border-radius: 12px;
+      color: var(--ink);
+    }
+    .pc-msg.assistant .pc-bubble { background: var(--paper); border-bottom-left-radius: 3px; }
+    .pc-msg.user .pc-bubble { background: var(--ink); color: rgba(255,255,255,0.9); border-bottom-right-radius: 3px; }
+
+    .pc-recs { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+    .pc-rec-label {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--warm);
+    }
+    .pc-rec {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: var(--paper);
+      gap: 7px;
+      padding: 6px 9px;
+      background: var(--surface);
+      border: 1px solid var(--line);
       border-left: 2px solid var(--warm);
       border-radius: 0 2px 2px 0;
     }
-    .preview-rec-num {
-      font-size: 10px;
-      color: var(--muted);
-      width: 16px;
-    }
-    .preview-rec-name {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--ink);
-    }
+    .pc-rec-num { font-size: 9px; color: var(--muted); width: 13px; }
+    .pc-rec-name { font-size: 10.5px; font-weight: 500; color: var(--ink); }
 
-    /* ── Stats row ────────────────────────────── */
-    .stats {
-      display: flex;
-      gap: 0;
-      border-top: 1px solid var(--line);
-      margin-top: 60px;
+    /* ── STATS ───────────────────────────────── */
+    .stats-section {
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
     }
     .stat {
-      flex: 1;
-      padding: 32px 60px;
+      padding: 48px 48px;
       border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
     }
     .stat:last-child { border-right: none; }
     .stat-num {
       font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 36px;
+      font-size: 42px;
       color: var(--ink);
       line-height: 1;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
     .stat-num em { font-style: italic; color: var(--warm); }
     .stat-label {
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
-    /* ── Footer ───────────────────────────────── */
+    /* ── HOW IT WORKS ────────────────────────── */
+    .how-section {
+      background: var(--paper);
+      padding: 80px 64px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 40px;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+    .step {
+      padding: 36px 36px 36px 0;
+      border-right: 1px solid var(--line);
+      padding-right: 36px;
+    }
+    .step:last-child { border-right: none; padding-right: 0; padding-left: 36px; }
+    .step:not(:first-child) { padding-left: 36px; }
+    .step-num {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 36px;
+      color: var(--line);
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .step-body {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── FOOTER ──────────────────────────────── */
     footer {
-      border-top: 1px solid var(--line);
-      padding: 18px 60px;
+      background: var(--ink);
+      padding: 28px 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .footer-text {
-      font-size: 12px;
-      color: var(--muted);
+    .footer-brand {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 15px;
+      color: rgba(255,255,255,0.5);
     }
-    .footer-links {
-      display: flex;
-      gap: 20px;
-    }
+    .footer-brand em { color: var(--warm); font-style: italic; }
+    .footer-links { display: flex; gap: 24px; }
     .footer-link {
       font-size: 12px;
-      color: var(--muted);
+      color: rgba(255,255,255,0.3);
       text-decoration: none;
+      font-family: monospace;
+      letter-spacing: 0.02em;
       transition: color 0.15s;
     }
-    .footer-link:hover { color: var(--ink); }
+    .footer-link:hover { color: var(--warm); }
   </style>
 </head>
 <body>
-<div class="page">
 
   <!-- Nav -->
   <nav>
     <div class="nav-brand">SHL <em>Advisor</em></div>
     <div class="nav-links">
       <a class="nav-link" href="/docs">API Docs</a>
-      <a class="nav-link" href="/health">Health</a>
+      <a class="nav-link" href="/health">Health Check</a>
       <a class="nav-cta" href="/app">Open Advisor →</a>
     </div>
   </nav>
@@ -331,55 +426,65 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-left">
-      <div class="hero-eyebrow">SHL Labs · AI Intern Assignment</div>
+      <div class="hero-eyebrow">SHL Labs · AI Intern Assignment 2026</div>
       <h1 class="hero-heading">
         Find the right<br>
         assessment for<br>
         <em>any</em> role.
       </h1>
       <p class="hero-body">
-        A conversational recommender grounded in SHL's catalog of 400+ individual test solutions. Describe a role, paste a job description, and receive a reasoned shortlist — in seconds.
+        A conversational recommender grounded in SHL's catalog of 400+ individual test solutions. Describe a role, paste a job description, and receive a reasoned shortlist in seconds.
       </p>
       <div class="hero-actions">
-        <a class="btn-primary" href="/app">Start a conversation</a>
-        <a class="btn-secondary" href="/docs">View API →</a>
+        <a class="btn-primary" href="/app">
+          Start a conversation
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="btn-ghost" href="/docs">View API docs →</a>
       </div>
     </div>
 
     <div class="hero-right">
       <div class="preview-card">
-        <div class="preview-header">
-          <div class="preview-dots">
-            <span></span><span></span><span></span>
+        <!-- Browser chrome -->
+        <div class="preview-titlebar">
+          <div class="traffic-lights">
+            <div class="tl tl-r"></div>
+            <div class="tl tl-y"></div>
+            <div class="tl tl-g"></div>
           </div>
-          <div class="preview-title">SHL Assessment Advisor</div>
+          <div class="preview-url">localhost:8000/app</div>
         </div>
-        <div class="preview-body">
-          <div class="preview-msg user">
-            <div class="preview-av">You</div>
-            <div class="preview-bubble">Senior Java engineer, 7 years experience. Microservices team.</div>
+        <!-- App preview -->
+        <div class="preview-inner">
+          <!-- Sidebar -->
+          <div class="preview-sidebar">
+            <div class="ps-brand">SHL <em>Advisor</em></div>
+            <div class="ps-label">Try asking</div>
+            <div class="ps-item">Graduate management trainees</div>
+            <div class="ps-item">Senior Java engineer, 7+ yrs</div>
+            <div class="ps-item">Call centre agents, entry level</div>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-label">Conversation budget</div>
+              <div class="ps-bar"><div class="ps-bar-fill"></div></div>
+            </div>
           </div>
-          <div class="preview-msg assistant">
-            <div class="preview-av">SHL</div>
-            <div class="preview-bubble">For a senior IC backend role, here's a grounded battery covering technical depth and reasoning:</div>
-          </div>
-          <div class="preview-recs">
-            <div class="preview-rec-label">4 assessments recommended</div>
-            <div class="preview-rec">
-              <div class="preview-rec-num">01</div>
-              <div class="preview-rec-name">Core Java (Advanced Level) (New)</div>
+          <!-- Chat -->
+          <div class="preview-chat">
+            <div class="pc-msg user">
+              <div class="pc-av">You</div>
+              <div class="pc-bubble">Senior Java engineer, 7 years. Microservices.</div>
             </div>
-            <div class="preview-rec">
-              <div class="preview-rec-num">02</div>
-              <div class="preview-rec-name">Spring (New)</div>
+            <div class="pc-msg assistant">
+              <div class="pc-av">SHL</div>
+              <div class="pc-bubble">Here's a grounded battery for this senior IC role:</div>
             </div>
-            <div class="preview-rec">
-              <div class="preview-rec-num">03</div>
-              <div class="preview-rec-name">SHL Verify Interactive G+</div>
-            </div>
-            <div class="preview-rec">
-              <div class="preview-rec-num">04</div>
-              <div class="preview-rec-name">Occupational Personality Questionnaire OPQ32r</div>
+            <div class="pc-recs">
+              <div class="pc-rec-label">4 assessments recommended</div>
+              <div class="pc-rec"><div class="pc-rec-num">01</div><div class="pc-rec-name">Core Java (Advanced Level)</div></div>
+              <div class="pc-rec"><div class="pc-rec-num">02</div><div class="pc-rec-name">SHL Verify Interactive G+</div></div>
+              <div class="pc-rec"><div class="pc-rec-num">03</div><div class="pc-rec-name">Spring (New)</div></div>
+              <div class="pc-rec"><div class="pc-rec-num">04</div><div class="pc-rec-name">OPQ32r</div></div>
             </div>
           </div>
         </div>
@@ -388,34 +493,56 @@
   </section>
 
   <!-- Stats -->
-  <div class="stats">
+  <div class="stats-section">
     <div class="stat">
       <div class="stat-num">400<em>+</em></div>
-      <div class="stat-label">Individual test solutions<br>from SHL's catalog</div>
+      <div class="stat-label">Individual test solutions<br>from SHL's official catalog</div>
     </div>
     <div class="stat">
       <div class="stat-num">1.0<em>0</em></div>
-      <div class="stat-label">Mean Recall@10 on<br>10 public test traces</div>
+      <div class="stat-label">Mean Recall@10 across<br>10 public test traces</div>
     </div>
     <div class="stat">
       <div class="stat-num">8</div>
-      <div class="stat-label">Turn conversation<br>budget enforced</div>
+      <div class="stat-label">Turn budget enforced<br>per conversation</div>
     </div>
     <div class="stat">
       <div class="stat-num">&lt;2<em>s</em></div>
-      <div class="stat-label">Typical response time<br>via Groq inference</div>
+      <div class="stat-label">Typical response time<br>via Groq LPU inference</div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="how-section">
+    <div class="section-eyebrow">How it works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Describe your role</div>
+        <div class="step-body">Type a job title, seniority level, or paste a full job description. The advisor silently extracts role type, competencies, and experience level.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">RAG retrieval</div>
+        <div class="step-body">Your query is embedded and matched against a FAISS vector index of 400+ SHL assessments. The top candidates are injected into the prompt as grounded context.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Reasoned shortlist</div>
+        <div class="step-body">Llama 3.3-70b returns 1–10 assessments with explanations. A hallucination guard ensures every URL returned exists in the real SHL catalog.</div>
+      </div>
     </div>
   </div>
 
   <!-- Footer -->
   <footer>
-    <div class="footer-text">Built for SHL Labs AI Intern Assignment · 2026</div>
+    <div class="footer-brand">SHL <em>Advisor</em></div>
     <div class="footer-links">
       <a class="footer-link" href="/health">GET /health</a>
       <a class="footer-link" href="/docs">POST /chat</a>
+      <a class="footer-link" href="/app">GET /app</a>
     </div>
   </footer>
 
-</div>
 </body>
 </html>
