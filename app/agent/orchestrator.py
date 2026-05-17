@@ -102,9 +102,10 @@ class AgentOrchestrator:
                 end_of_conversation=parsed.get('end_of_conversation', False)
             )
         except Exception as e:
-            print("Error parsing LLM output:", e)
+            error_msg = str(e)
+            print("Error calling Groq or parsing LLM output:", error_msg)
             return ChatResponse(
-                reply="I'm sorry, I couldn't process that request properly.",
+                reply=f"Error: {error_msg}. Please check the server logs.",
                 recommendations=[],
                 end_of_conversation=False
             )
