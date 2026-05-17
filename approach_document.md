@@ -64,4 +64,4 @@ After each prompt or retrieval change, public traces were re-evaluated to confir
 
 ## 6. AI Tools Used
 
-**Antigravity (agentic coding assistant)** was used for: scaffolding FastAPI boilerplate, writing the FAISS index builder, drafting the initial system prompt, iterating on prompt rules based on observed failure modes, and building the evaluation harness. All architecture decisions, stack selection, and debugging were directed and validated by me.
+Agentic coding assistant was used for: scaffolding FastAPI boilerplate, writing the FAISS index builder, drafting the initial system prompt, iterating on prompt rules based on observed failure modes, and building the evaluation harness. All architecture decisions, stack selection, and debugging were directed and validated by me.
